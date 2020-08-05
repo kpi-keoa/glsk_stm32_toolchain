@@ -15,6 +15,9 @@ Requirements
 - `OpenOCD <http://openocd.org>`_.
   
   | Stable version: ``openocd``
+    (Not recommended as it is outdated and incompatible with our openocd config.
+     If you prefer stable version, use ``openocd -f board/stm32f4discovery.cfg``
+     instead of our ``openocd -f openocd_glstarterkit.cfg``)
   | Latest Git version: ``openocd-git`` (through AUR)
 - `arm-none-eabi Toolchain <https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm>`_
   
