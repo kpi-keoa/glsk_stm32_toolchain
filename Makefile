@@ -7,10 +7,14 @@ SRCS +=
 # User defines
 DEFINES = GLSK_BOARD=1
 # The libs which are linked to the resulting target
-LIBS = -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
+LIBS = -Wl,--start-group -lc -lgcc -Wl,--end-group
 LIBS += -lopencm3
 # Possible values: debug, release
 PROFILE = debug
+# Use semihosting or not. Possible values: 0, 1
+# Semihosting allows to pass printf() output and whole files between MCU and PC
+# but the built target will not work without debugger connected
+SEMIHOSTING ?= 0
 # Optimization flags for debug build:
 #   -Og -- optimize for debugging
 #   -g3 -- include the most verbose debugging information into elf
@@ -49,9 +53,17 @@ include $(OPENCM3_DIR)/mk/genlink-config.mk
 ARCHFLAGS := -mcpu=cortex-m4 -mthumb $(FPU_FLAGS)
 CFLAGS := $(ARCHFLAGS)
 CFLAGS += -fdata-sections -ffunction-sections
+CFLAGS += -DUSE_SEMIHOSTING=$(SEMIHOSTING)
 CFLAGS += $(addprefix -D,$(DEFINES)) $(genlink_cppflags) $(EXTRAFLAGS)
 
-LDFLAGS := $(ARCHFLAGS) --static -nostartfiles
+LDFLAGS := $(ARCHFLAGS) --static -nostartfiles 
+
+ifeq ("$(SEMIHOSTING)","1")
+LDFLAGS += --specs=rdimon.specs -lrdimon
+else
+LDFLAGS += -lnosys
+endif
+
 LDFLAGS += -L$(BUILD_DIR)/$(PROFILE) $(LIBS)
 # Remove unused sections
 ifneq ($(PROFILE),debug)
@@ -156,7 +168,11 @@ flash: $(BUILD_DIR)/$(PROFILE)/$(TARGET).elf
 # - start openocd. It will listen for incoming connections on port 3333 by default
 # - start gdb and connect as: 'target extended-remote localhost:3333' or simply 'tar ext :3333'
 gdb: $(BUILD_DIR)/$(PROFILE)/$(TARGET).elf
+ifeq ("$(SEMIHOSTING)","1")
+	$(GDB) -ex 'target extended-remote | $(OOCD) -c "gdb_port pipe; init; arm semihosting enable; arm semihosting_fileio enable"' $<
+else
 	$(GDB) -ex 'target extended-remote | $(OOCD) -c "gdb_port pipe"' $<
+endif
 
 
 ## Clean build directory for current profile and its build artefacts
