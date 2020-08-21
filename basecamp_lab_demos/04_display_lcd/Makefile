@@ -1,5 +1,5 @@
 # The main (project top) file without .c
-TARGET = adcbasics
+TARGET = lcddemo.c
 # All source files go here:
 SRCS = $(TARGET).c
 # other sources added like that
@@ -8,7 +8,7 @@ SRCS += pin.c tick.c lcd_hd44780.c
 DEFINES = GLSK_BOARD=1
 # The libs which are linked to the resulting target
 LIBS = -Wl,--start-group -lc -lgcc -Wl,--end-group
-LIBS += -lopencm3 -lprintf
+LIBS += -lopencm3
 # Possible values: debug, release
 PROFILE = debug
 # Use semihosting or not. Possible values: 0, 1
@@ -43,7 +43,7 @@ LIBOPENCM3_TARGET ?= stm32/f4
 # Directory with project sources
 SRC_DIR ?= src
 # Project include directories where project headers are placed
-INC_DIRS ?= inc lib
+INC_DIRS ?= inc
 # Directory where everything is built
 BUILD_DIR ?= build
 # Libraries should reside in one dir
@@ -116,15 +116,6 @@ $(BUILD_DIR)/$(PROFILE):
 
 $(OBJDIR):
 	mkdir -p $@
-
-libprintf: $(BUILD_DIR)/$(PROFILE)/libprintf.a
-$(BUILD_DIR)/$(PROFILE)/libprintf.a: $(OBJDIR) | $(OBJDIR)/libprintf.o
-	$(AR) rcsv $@ $|
-
-$(BUILD_DIR)/$(PROFILE)/obj/libprintf.o: $(LIB_DIR)/libprintf/printf.c
-	@echo Building libprintf...
-	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
-
 
 # Means that this target will trigger PROFILE change to release
 $(BUILD_DIR)/libopencm3-docs: PROFILE=release
@@ -199,7 +190,7 @@ tidy: clean
 
 
 ## Build all
-target $(TARGET): libprintf $(BUILD_DIR)/$(PROFILE)/$(TARGET).bin $(BUILD_DIR)/$(PROFILE)/$(TARGET).hex
+target $(TARGET): $(BUILD_DIR)/$(PROFILE)/$(TARGET).bin $(BUILD_DIR)/$(PROFILE)/$(TARGET).hex
 
 ## Alias for release build
 ## Catchall target. release-flash becomes make PROFILE=release flash
