@@ -4,7 +4,7 @@
 
 // Clear Display and Return Home commands
 static const uint32_t DELAY_CLRRET_US = 1530;
-// Read Data from RAM and Write Data to RAM commands 
+// Read Data from RAM and Write Data to RAM commands
 static const uint32_t DELAY_READWRITE_US = 43;
 // Read Busy Flag and Address command
 static const uint32_t DELAY_BUSYFLAG_US = 0;
@@ -16,6 +16,32 @@ static const uint32_t DELAY_ENA_STROBE_US = 1;
 // Initialization procedure have some specific delays. Here we have 2 delays for each init step
 static const uint32_t DELAY_INIT0_US = 4100;
 static const uint32_t DELAY_INIT1_US = 100;
+
+
+//Symbol address to be written in SGRAM
+enum ua_sym_addr {
+	G_UPPER_CASE = 0, 	// Symbol 'Ґ' (0xA5) adress 0x00
+	G_LOWER_CASE,		// Symbol 'ґ' (0xB4) adress 0x01
+	YI_UPPER_CASE,		// Symbol 'Є' (0xAA) adress 0x02
+	YI_LOWER_CASE,		// Symbol 'є' (0xBA) adress 0x03
+	YE_UPPER_CASE,		// Symbol 'Ї' (0xAF) adress 0x04
+	YE_LOWER_CASE,		// Symbol 'ї' (0xBF) adress 0x05
+	SOFTSIGN,			// Symbol 'ь' (0xDC) adress 0x06
+	TEMP_SYM,			// Symbol '°' (0xB0) adress 0x07
+	__LAST
+};
+
+// character pattern for writing to SGRAM
+static const uint8_t ua_pattern[__LAST][__LAST] = {
+	[G_UPPER_CASE] = {0x01, 0x1F, 0x10, 0x10, 0x10, 0x10, 0x10, 0x00},
+	[G_LOWER_CASE] = {0x00, 0x01, 0x1F, 0x10, 0x10, 0x10, 0x10, 0x00},
+	[YI_UPPER_CASE] = {0x0A, 0x00, 0x0E, 0x04, 0x04, 0x04, 0x0e, 0x00},
+	[YI_LOWER_CASE] = {0x09, 0x00, 0x0C, 0x04, 0x04, 0x04, 0x0e, 0x00},
+	[YE_UPPER_CASE] = {0x0E, 0x11, 0x10, 0x1C, 0x10, 0x11, 0x0E, 0x00},
+	[YE_LOWER_CASE] = {0x00, 0x00, 0x0E, 0x11, 0x1C, 0x11, 0x0E, 0x00},
+	[SOFTSIGN] = {0x10, 0x10, 0x10, 0x1E, 0x11, 0x11, 0x1E, 0x00},
+	[TEMP_SYM] = {0x0C, 0x12, 0x12, 0x0C, 0x00, 0x00, 0x00, 0x00}
+};
 
 
 /**
@@ -202,6 +228,44 @@ void sk_lcd_putchar(struct sk_lcd *lcd, const char ch)
 }
 
 
+// Inintial ua symbols pattern
+static void sk_lcd_init_ua_symbol(struct sk_lcd *lcd)
+{
+	void set_char_pattern(struct sk_lcd *lcd, uint8_t *pattern)
+	{
+		for (int i = 0; i < __LAST; i++)
+			sk_lcd_write_byte(lcd, pattern[i]);
+	}
+
+	sk_lcd_cmd_setaddr(lcd, 0x00, true);
+	set_char_pattern(lcd, ua_pattern[G_UPPER_CASE]);
+
+
+	sk_lcd_cmd_setaddr(lcd, 0x08, true);
+	set_char_pattern(lcd, ua_pattern[G_LOWER_CASE]);
+
+	sk_lcd_cmd_setaddr(lcd, 0x10, true);
+	set_char_pattern(lcd, ua_pattern[YI_UPPER_CASE]);
+
+	sk_lcd_cmd_setaddr(lcd, 0x18, true);
+	set_char_pattern(lcd, ua_pattern[YI_LOWER_CASE]);
+
+	sk_lcd_cmd_setaddr(lcd, 0x020, true);
+	set_char_pattern(lcd, ua_pattern[YE_UPPER_CASE]);
+
+	sk_lcd_cmd_setaddr(lcd, 0x028, true);
+	set_char_pattern(lcd, ua_pattern[YE_LOWER_CASE]);
+
+	sk_lcd_cmd_setaddr(lcd, 0x030, true);
+	set_char_pattern(lcd, ua_pattern[SOFTSIGN]);
+
+	sk_lcd_cmd_setaddr(lcd, 0x038,true);
+	set_char_pattern(lcd, ua_pattern[TEMP_SYM]);
+
+	sk_lcd_cmd_setaddr(lcd, 0x00, false);
+}
+
+
 static void lcd_init_4bit(struct sk_lcd *lcd)
 {
 	sk_pin_group_set(*lcd->pin_group_data, 0x00);
@@ -226,6 +290,7 @@ static void lcd_init_4bit(struct sk_lcd *lcd)
 
 	// entry mode set: increment cnt (I/D), noshift (SH)
 	sk_lcd_cmd_emodeset(lcd, 1, 0);
+
 }
 
 
@@ -276,6 +341,9 @@ sk_err sk_lcd_init(struct sk_lcd *lcd)
 	lcd->__isinitialized = true;
 
 	lcd_init_4bit(lcd);
+
+	sk_lcd_init_ua_symbol(lcd);
+
 	return SK_EOK;
 }
 
@@ -299,7 +367,7 @@ uint8_t sk_lcd_charmap_rus_cp1251(const char c)
 		case 'Б': return 0xA0;
 		case 'В': return 'B';
 		case 'Г': return 0xA1;
-		case 'Ґ': return 0xA1;		// bad sym
+		case 'Ґ': return G_UPPER_CASE;
 		case 'Д': return 0xE0;
 		case 'Е': return 'E';
 		case 'Ё': return 0xA2;
@@ -307,7 +375,7 @@ uint8_t sk_lcd_charmap_rus_cp1251(const char c)
 		case 'З': return 0xA4;
 		case 'И': return 0xA5;
 		case 'І':  return 'I';
-		case 'Ї':  return 'I';		// bad sym
+		case 'Ї':  return YI_UPPER_CASE;
 		case 'Й': return 0xA6;
 		case 'К': return 'K';
 		case 'Л': return 0xA7;
@@ -327,25 +395,25 @@ uint8_t sk_lcd_charmap_rus_cp1251(const char c)
 		case 'Щ': return 0xE2;
 		case 'Ъ': return 0xAD;
 		case 'Ы': return 0xAE;
-		case 'Ь': return 'b';		// bad sym
+		case 'Ь': return SOFTSIGN;
 		case 'Э': return 0xAF;
-		case 'Є': return 'E';		// bad sym
+		case 'Є': return YE_UPPER_CASE;
 		case 'Ю': return 0xB0;
 		case 'Я': return 0xB1;
 		case 'а': return 'a';
 		case 'б': return 0xB2;
 		case 'в': return 0xB3;
 		case 'г': return 0xB4;
-		case 'ґ': return 0xB4;		// bad sym
+		case 'ґ': return G_LOWER_CASE;
 		case 'д': return 0xE3;
 		case 'е': return 'e';
-		case 'є': return 'e';		// bad sym
+		case 'є': return YE_LOWER_CASE;
 		case 'ё': return 0xB5;
 		case 'ж': return 0xB6;
 		case 'з': return 0xB7;
 		case 'и': return 0xB8;
 		case 'і': return 'i';
-		case 'ї': return 'i';		// bad sym
+		case 'ї': return YI_LOWER_CASE;
 		case 'й': return 0xB9;
 		case 'к': return 0xBA;
 		case 'л': return 0xBB;
@@ -375,7 +443,7 @@ uint8_t sk_lcd_charmap_rus_cp1251(const char c)
 		case '«': return 0xC8;
 		case '»': return 0xC9;
 		case '№': return 0xCC;
-		case '°': return 0xEF;
+		case '°': return TEMP_SYM;
 		case '·': return 0xDF;
 
 		default: return 0xFF;	// black square for unknown symbols
