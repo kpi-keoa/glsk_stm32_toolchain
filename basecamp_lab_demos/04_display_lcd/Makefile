@@ -1,5 +1,5 @@
 # The main (project top) file without .c
-TARGET = lcddemo.c
+TARGET = lcddemo
 # All source files go here:
 SRCS = $(TARGET).c
 # other sources added like that

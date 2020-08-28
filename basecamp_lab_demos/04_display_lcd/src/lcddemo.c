@@ -88,7 +88,7 @@ int main(void)
 {
     rcc_periph_clock_enable(RCC_GPIOD);
 	rcc_periph_clock_enable(RCC_GPIOE);		// lcd is connected to port E
-	glsk_pins_init(true);
+	glsk_pins_init(false);
 	sk_pin_group_set(sk_io_lcd_data, 0x00);
 	sk_pin_set(sk_io_led_orange, true);
 

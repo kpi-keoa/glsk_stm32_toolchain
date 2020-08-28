@@ -18,13 +18,7 @@ enum sk_err {
 	/** Wrong argument passed */
 	SK_EWRONGARG = -4,
 	/** Not enough arguments */
-	SK_ENENARG = -5,
-	/** Range exceeds available limits */
-	SK_ERANGE = -6,
-	/** Data storage is full */
-	SK_EFULL = -7,
-	/** Data storage is empty */
-	SK_EEMPTY = -8
+	SK_ENENARG = -5
 };
 
 

@@ -206,16 +206,6 @@ extern const sk_pin sk_io_spiflash_ce;
 extern const sk_pin_group sk_io_lcd_data;
 
 #if !(SK_USE_SIZE_OPTIMIZATIONS)
-/**
- * Initialize pins available on GL-SK board
- * @set_all: whether to set all unused pins to analog (to reduce power consumption)
- *
- * Important:
- * Setting all unused pins to analog also sets to analog the SWD pins used by ST-Link debugger
- * interface. This causes connection to device fail as long as device is flashed and init is run.
- *
- * If MCU does not respond to debugger, try connecting under reset
- */
 void glsk_pins_init(const bool set_all);
 #endif
 #endif

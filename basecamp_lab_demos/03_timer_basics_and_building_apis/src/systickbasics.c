@@ -91,7 +91,7 @@ int main(void)
 {
     rcc_periph_clock_enable(RCC_GPIOD);
     //gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO12);
-	glsk_pins_init(true);
+	glsk_pins_init(false);
 	sk_pin_set(sk_io_led_orange, true);
 
 	sys_tick_init();

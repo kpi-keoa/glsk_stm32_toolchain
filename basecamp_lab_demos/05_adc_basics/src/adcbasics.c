@@ -189,7 +189,7 @@ static inline float adc_temp_convert(uint16_t adcval)
 int main(void)
 {
 	rcc_periph_clock_enable(RCC_GPIOE);		// LCD is connected to portE
-	glsk_pins_init(true);
+	glsk_pins_init(false);
 
 	sk_tick_init(16000000ul / 10000ul, 2);
 	cm_enable_interrupts();
