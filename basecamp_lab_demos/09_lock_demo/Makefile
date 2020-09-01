@@ -1,5 +1,5 @@
 # The main (project top) file without .c
-TARGET = i2csimple
+TARGET = lock_demo
 # All source files go here:
 SRCS = $(TARGET).c
 # other sources added like that
@@ -10,7 +10,7 @@ DEFINES = GLSK_BOARD=1
 LIBS = -Wl,--start-group -lc -lgcc -Wl,--end-group
 LIBS += -lopencm3
 LIBS += -lprintf
-LIBS += -lm
+# LIBS += -lm
 # Possible values: debug, release
 PROFILE = debug
 # Use semihosting or not. Possible values: 0, 1

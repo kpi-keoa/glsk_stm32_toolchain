@@ -1,9 +1,9 @@
 # The main (project top) file without .c
-TARGET = i2csimple
+TARGET = i2c_simple
 # All source files go here:
 SRCS = $(TARGET).c
 # other sources added like that
-SRCS += pin.c tick.c lcd_hd44780.c sync.c
+SRCS += pin.c tick.c lcd_hd44780.c
 # User defines
 DEFINES = GLSK_BOARD=1
 # The libs which are linked to the resulting target

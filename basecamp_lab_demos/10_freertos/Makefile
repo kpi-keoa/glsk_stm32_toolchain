@@ -3,7 +3,10 @@ TARGET = i2csimple
 # All source files go here:
 SRCS = $(TARGET).c
 # other sources added like that
-SRCS += pin.c tick.c lcd_hd44780.c sync.c
+SRCS += pin.c ## lcd_hd44780.c sync.c tick.c
+SRCS += croutine.c queue.c timers.c event_groups.c port.c tasks.c
+SRCS += list.c stream_buffer.c
+SRCS += heap_4.c
 # User defines
 DEFINES = GLSK_BOARD=1
 # The libs which are linked to the resulting target
